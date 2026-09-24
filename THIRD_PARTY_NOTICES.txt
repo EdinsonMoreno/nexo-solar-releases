@@ -1,0 +1,221 @@
+Nexo Solar - Third-Party License Notices
+=========================================
+
+This distribution of Nexo Solar links dynamically, at run time, against the
+Qt libraries through the PySide6 (Qt for Python) bindings. Those components
+are NOT part of Nexo Solar's own code and keep their original licenses.
+
+PySide6 / Qt for Python (includes PySide6-Essentials and PySide6-Addons)
+--------------------------------------------------------------------------
+Project:   https://pyside.org
+Version:   6.11.2 (pinned in constraints-build.txt)
+License:   LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only (upstream choice)
+Used as:   LGPL-3.0-only
+Verified:  `License:` field of the installed wheel metadata
+           (.venv/lib/*/site-packages/pyside6-6.11.2.dist-info/METADATA,
+           and the matching *-Essentials/-Addons dist-info files).
+
+shiboken6
+---------
+Project:  https://pyside.org (PySide6's CPython binding generator/runtime)
+Version:  6.11.2 (pinned in constraints-build.txt)
+License:  LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only (upstream choice)
+Used as:  LGPL-3.0-only
+Verified: `License:` field of shiboken6-6.11.2.dist-info/METADATA.
+
+Qt (the underlying C++ framework PySide6 binds to)
+----------------------------------------------------
+Project:  https://www.qt.io
+Distribution choice: LGPL-3.0-only for the eligible Qt modules used here.
+Evidence: the installed PySide6 metadata above declares the licensing choice;
+it does not constitute a per-module audit of every library in the bundle.
+Details:  https://www.qt.io/licensing
+
+QtWebEngine / Chromium
+-----------------------
+Nexo Solar embeds the operative dashboard (Mockup/) using QtWebEngine
+(QWebEngineView), used from modbuspython/ui/web_dashboard.py and
+modbuspython/ui/map_widget.py. QtWebEngine ships as part of the
+PySide6-Addons wheel and bundles a build of the Chromium engine.
+- QtWebEngine is supplied by PySide6-Addons, whose installed metadata
+  declares the alternatives listed above. Per-file/module license texts
+  and the Chromium attribution inventory must be retained from the exact
+  QtWebEngine source/build used for the release.
+- Chromium includes many independently licensed third-party components.
+  The installed PySide6-Addons metadata is NOT their license inventory.
+  Exact-version Chromium notices remain a release prerequisite; the
+  upstream attribution reference to consult is:
+  https://doc.qt.io/qt-6/qtwebengine-index.html#licenses-and-attributions
+- The QtWebEngine sandbox helper process (QtWebEngineProcess) ships as a
+  separate executable inside the PySide6 wheel
+  (PySide6/Qt/libexec/QtWebEngineProcess on Linux); it is redistributed
+  as a separate replaceable file in the onedir packaging described below.
+
+Why this matters for how Nexo Solar is packaged
+-------------------------------------------------
+The LGPL-3.0 requires that a user of the combined work be able to relink or
+replace the LGPL-licensed library (here, Qt/PySide6/QtWebEngine) with a
+modified or different compatible version. To honor that:
+
+- Nexo Solar is packaged in PyInstaller "onedir" mode (NOT "onefile"), so
+  the Qt/PySide6/QtWebEngine shared libraries (including
+  QtWebEngineProcess and the Chromium resource/locale files it needs)
+  ship as separate, individually replaceable files next to the
+  application executable, instead of being embedded inside a single
+  opaque binary.
+- To replace the bundled libraries: close Nexo Solar and its helper
+  processes, back up the installation, and unpack/build a compatible set
+  of PySide6, PySide6-Essentials, PySide6-Addons and shiboken6 for the same
+  OS, architecture and CPython ABI as the packaged application. Replace
+  the binding extension modules AND their Qt shared libraries/plugins,
+  QtWebEngineProcess, resources and locales as a coherent set. Preserve
+  the bundle's relative layout, normally under _internal/PySide6 and
+  _internal/shiboken6 (inspect the actual release payload first).
+  Linux RPM installs under /opt/nexo-solar; Windows uses the install
+  directory selected by the installer. Replacing protected installation
+  files requires appropriate filesystem permissions. Do not replace the
+  application executable or user data. Start the application and run the
+  documented installed-product smoke test; restore the backup if the
+  replacement is incompatible. Compatibility and replacement have not yet
+  been demonstrated against a released binary.
+- Nexo Solar's own application code is proprietary and is distributed only
+  in compiled/frozen form; only the Qt/PySide6/QtWebEngine libraries
+  themselves are LGPL-licensed and only those are relinkable under this
+  notice. Nexo Solar's own source availability and usage terms are defined
+  separately in NEXO_SOLAR_LICENSE.txt (mirrors the repository's
+  LICENSE.txt) and are not altered or extended by this notice.
+
+Full license texts
+-------------------
+The verbatim text of the licenses referenced above is included alongside
+this notice:
+
+- LGPL-3.0.txt              - GNU Lesser General Public License, version 3
+- GPL-3.0.txt               - GNU General Public License, version 3
+                              (incorporated by reference into the LGPL-3.0
+                              terms; also one of PySide6's alternative
+                              upstream license choices)
+- LEAFLET-BSD-2-Clause.txt  - Leaflet 1.9.4 (both vendored copies)
+- PYSERIAL-BSD-3-Clause.txt - pyserial 3.5
+- THREEJS-MIT.txt           - Three.js r149 (core + OrbitControls/GLTFLoader)
+
+Obtaining corresponding source code
+-------------------------------------
+The unmodified source code for the Qt/PySide6/QtWebEngine libraries bundled
+with this application is publicly available from the projects above at no
+charge:
+- PySide6 / shiboken6 source: https://code.qt.io/cgit/pyside/pyside-setup.git/
+  (select the source tag matching the installed 6.11.2 wheels).
+- Qt source (including the Chromium sources QtWebEngine is built from):
+  https://download.qt.io/official_releases/qt/ and
+  https://code.qt.io/cgit/qt/qtwebengine.git/
+For each release, record the exact Qt/PySide/QtWebEngine source revisions
+and retain the matching source archives, submodules and build instructions
+needed to reproduce the library binaries. The generic upstream locations
+above are discovery references, not evidence that this release has already
+fulfilled its corresponding-source distribution requirements. This check
+and the exact Chromium notices remain prerequisites before publication.
+Nexo Solar consumes the published wheels without project-side changes.
+
+Other third-party runtime dependencies (from requirements.txt)
+------------------------------------------------------------------
+Licenses below were verified against the metadata actually installed in
+this project's .venv (Python 3.14) via `importlib.metadata`, reading each
+package's `License:` / `License-Expression:` field and, where that field
+was empty, the bundled `METADATA` file's `License-Expression:` line.
+Versions shown are the ones installed at the time of this verification;
+exact pins for the build environment live in constraints-build.txt.
+
+| Package        | Version installed | License        | Verified via                                   |
+|----------------|--------------------|-----------------|-------------------------------------------------|
+| requests       | 2.34.2             | Apache-2.0      | dist-info METADATA `License:` + Classifier       |
+| tqdm           | 4.70.0              | MPL-2.0 AND MIT | dist-info METADATA `License:` field              |
+| pymodbus       | 3.15.0              | BSD-3-Clause    | dist-info METADATA `License:` + Classifier       |
+| PyYAML         | 6.0.3               | MIT             | dist-info METADATA `License:` + Classifier       |
+| jsonschema     | 4.26.0              | MIT             | dist-info METADATA `License-Expression:` (License field empty; `COPYING` license file bundled) |
+| pyserial       | 3.5                 | BSD-3-Clause    | dist-info METADATA `License:` field says only "BSD"; variant confirmed against upstream LICENSE.txt at the v3.5 tag (https://raw.githubusercontent.com/pyserial/pyserial/v3.5/LICENSE.txt), which carries `SPDX-License-Identifier: BSD-3-Clause` and the no-endorsement clause; verified 2026-09-23, full text in licenses/PYSERIAL-BSD-3-Clause.txt |
+| python-dotenv  | 1.2.3               | BSD-3-Clause    | dist-info METADATA `License:` field              |
+| cryptography   | 50.0.1              | Apache-2.0 OR BSD-3-Clause | dist-info METADATA `License-Expression:` (License field empty; `LICENSE`, `LICENSE.APACHE`, `LICENSE.BSD` files bundled) |
+
+These identifiers reproduce installed metadata; they are not a blanket
+permission or compatibility finding. In particular MPL-2.0 is not described
+here as permissive. Preserve each package's copyright, license and NOTICE
+files with the distribution and review its actual terms before publication.
+For pyserial 3.5, the installed metadata says only "BSD"; the numbered
+variant (BSD-3-Clause) is now confirmed against the upstream LICENSE.txt for
+the v3.5 tag - see the table above and licenses/PYSERIAL-BSD-3-Clause.txt.
+
+Vendored JavaScript (Mockup/vendor and modbuspython/ui/assets/leaflet)
+--------------------------------------------------------------------------
+Leaflet
+Project:  https://leafletjs.com
+Bundled at: Mockup/vendor/leaflet/leaflet.js and leaflet.css (used by the
+          Mockup SPA), and a second, independent copy at
+          modbuspython/ui/assets/leaflet/ (leaflet.js, leaflet-src.js,
+          leaflet-src.esm.js + .map files, leaflet.css) used by the legacy
+          Qt-side 3D viewer map widget (modbuspython/ui/map_widget.py; see
+          main_app.spec's "Legacy 3D viewer map assets" datas entries).
+          Both copies bundle the same five marker/layer PNGs under images/.
+Version:  1.9.4 in both copies, per the identical preserve comment at the
+          top of each leaflet.js ("Leaflet 1.9.4 ... (c) 2010-2023 Vladimir
+          Agafonkin, (c) 2010-2011 CloudMade").
+License:  BSD-2-Clause. Verified 2026-09-23 against the upstream LICENSE
+          file for the v1.9.4 tag
+          (https://raw.githubusercontent.com/Leaflet/Leaflet/v1.9.4/LICENSE),
+          which matches the copyright line already embedded in the local
+          leaflet.js header word-for-word. Full text preserved locally at
+          licenses/LEAFLET-BSD-2-Clause.txt. Neither vendored copy ships a
+          local LICENSE/COPYING file of its own (the JS/CSS headers only
+          give version and copyright), so this notice plus the preserved
+          text is this distribution's license evidence for Leaflet.
+
+Three.js (core + examples/jsm addons)
+Project:  https://threejs.org (bundled at modbuspython/assets/threejs/:
+          three.module.js, OrbitControls.js, GLTFLoader.js; used by the Qt
+          3D tripod viewer, see modbuspython/assets/tripod_assembly.glb and
+          main_app.spec's threejs datas entry).
+Version:  r149, per the `REVISION = '149'` constant in three.module.js.
+          OrbitControls.js and GLTFLoader.js carry no separate version
+          marker; they are three.js's own examples/jsm addons from the same
+          release and ship under the same project license.
+License:  MIT. three.module.js embeds the notice verbatim
+          ("@license / Copyright 2010-2023 Three.js Authors /
+          SPDX-License-Identifier: MIT"); OrbitControls.js and GLTFLoader.js
+          have no separate header but are covered by the same project
+          LICENSE. Verified 2026-09-23 against the upstream LICENSE file for
+          the r149 tag
+          (https://raw.githubusercontent.com/mrdoob/three.js/r149/LICENSE),
+          which matches the embedded notice. Full text preserved locally at
+          licenses/THREEJS-MIT.txt. This dependency previously had no entry
+          in this notice file.
+
+This file is generated/reviewed as part of the release packaging work
+(sdd change "release-pipeline", lote A3.2), building on the PySide6
+migration notice originally written for lote B1. It documents licensing
+facts about third-party components; it does not change Nexo Solar's own
+license, defined in NEXO_SOLAR_LICENSE.txt.
+
+================================================================================
+INVENTARIO DE ATRIBUCIONES DE CHROMIUM / QTWEBENGINE
+================================================================================
+QtWebEngine incorpora Chromium, que a su vez incluye cientos de componentes de
+terceros con sus propias licencias y avisos de atribucion. Los paquetes PySide6
+distribuidos en PyPI (PySide6, PySide6-Essentials, PySide6-Addons, shiboken6
+6.11.2) NO incluyen esos avisos: solo declaran la licencia del binding en sus
+metadatos. Verificado el 2026-09-23 inspeccionando los .dist-info instalados.
+
+Estado (actualizado 2026-09-23): el inventario correspondiente a la version
+exacta de QtWebEngine que viaja en este paquete (6.11.2, Chromium
+140.0.7339.225) esta documentado en
+licenses/QTWEBENGINE_THIRD_PARTY.txt, con las 126 componentes que la propia
+documentacion de Qt lista para QtWebEngine, sus identificadores de licencia,
+los enlaces oficiales a doc.qt.io para cada uno, y el texto base de las
+familias de licencia (MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0, ISC, Zlib)
+que cubren la mayoria de esos componentes, obtenido de SPDX License List Data.
+Ese archivo tambien documenta explicitamente que queda fuera de alcance (el
+texto integro por componente para licencias no cubiertas por esas seis
+familias, y el inventario about://credits/third_party/ completo de Chromium,
+que requeriria compilar la revision exacta de Chromium o navegar
+qtwebengine://credits/ en la app real - ninguna de las dos se hizo aqui). Esto
+NO es una garantia de cumplimiento legal completo; es un inventario trazable
+con evidencia de origen para cada dato.
